@@ -1,0 +1,58 @@
+Authors: Clement Chalumeau (SETI Institute) & Franck Marchis (Iris AO & SETI Institute)
+Date June 17, 2016
+
+
+# 2020/05/02 Update Clement Chalumeau
+Updated for Python3.7 (beleived to wok with all python >= 3.6):
+	- Updated compilation option for Cython. 
+	- Strings passed to the SO file must be encoded (use .encode() string method)
+To make it work, just follow what's next.
+
+Version: Linux 64 bits
+Tested with Anaconda 64 bits for linux (Python 2.7)
+
+Folder containing all the files necessary to build the IrisAO python API using libirisao.devices.1.0.2.5.so
+
+Files :
+	- irisao.mirrors.h:                Header file describing the library interface
+	- libirisao.devices.1.0.2.5.so:    Dynamic library used to control the mirrors
+	- setup.py:                        File used by distutils and cython to produce c++ code and compile it
+	- IrisAO_Python.pyx:               Cython file, defines functions wrapping functions from the library4
+	- IrisAO_Python_MirrorControl.py:  File providing the python interface of the module, using the funtions
+								       from the file IrisAO_python_wrapper.so
+	- __init__.py 				       Required for the module to work properly. Imports all the functions 
+									   from IrisAO_Python_MirrorControl.py
+	- raisePythonException.cpp         c++ file that handles exceptions thrown by the so library and raises a Python
+	 								   RuntimeError
+	- raisePythonException.h           c++  header file that defines the function used to raise Python exceptions
+
+The following files appear only after the execution of setup.py:
+	- IrisAO_Python.cpp:            Appears after the execution of setup.py. C++ code produced by cython,
+								    corresponding to the .pyx file
+	- IrisAO_Python.so:             Appears after the execution of setup.py. Compiled version of the 
+							        IrisAO_Python.cpp. The functions can be used directly from 
+							        Python.
+
+
+To compile the module:
+Tested with Anaconda 64 bits for linux (Python 2.7)
+- Make sure that g++ (c++ compiler) is installed, and install it if needed
+- Copy libirisao.devices.1.0.2.5.so in ${ANACONDA_SETUP_DIR}/lib
+- Create a symbolic link libirisao.devices.so from libirisao.devices.1.0.X.X.so in ${ANACONDA_SETUP_DIR}/lib 
+ (e.g. ln -s libirisao.devices.1.0.2.5.so ${ANACONDA_SETUP_DIR}/lib/libirisao.devices.so)
+  where ANACONDA_SETUP_DIR is the location of anaconda, e.g /home/username/anaconda2/
+- From the current folder (IrisAO_PythonAPI), run:
+     python setup.py build_ext --inplace
+- The file IrisAO_Python.so is created
+
+
+The folder can then be exported as a python module, the only 3 required files are:
+	- IrisAO_Python.so
+	- IrisAO_Python_MirrorControl.py
+	- __init__.py
+For the module to work properly, the file libirisao.devices.so has to be
+in the folder ${ANACONDA_SETUP_DIR}/lib, linking to the current version 
+of the irisAO library (such as libirisao.devices.1.0.2.5.so)
+
+
+
