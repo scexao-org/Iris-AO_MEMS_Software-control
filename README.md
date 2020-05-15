@@ -7,6 +7,6 @@ The actual folder which is used and that works properly in Meudon on FIRSTv2 ben
 
 To install it on your own computer, just follow what's written in description.txt
 
-It's this folder that is being used as a library to control the mems in FIRSTv2. By the way, the code proper to FIRSTv2 is in the folder /example_FIRSTv2/, but some parts of it wouldn't work on another machine, because of the use of path specific to my machine, for instance.
+It's this folder that is being used as a library to control the mems in FIRSTv2. By the way, the code proper to FIRSTv2 is in the folder /example_FIRSTv2/, but some parts of it wouldn't work on another machine, because of the use of path specific to my machine, for instance. Finally, there are some parts that use ZeroMQ python library, but they have nothing to do with the mems, it's just a firstv2 software feature.
 
 Enjoy your new life 3.6+
