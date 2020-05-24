@@ -57,6 +57,7 @@ client_address = b"P"
 
 """
 
+
 class ComPortSUB(Thread):
     def __init__(self, publisher, port_SUB, address):
         super().__init__()
