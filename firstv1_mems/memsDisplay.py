@@ -31,6 +31,7 @@
 
 # from __future__ import unicode_literals
 
+import os
 import core
 np = core.np
 
@@ -54,7 +55,7 @@ from matplotlib.figure import Figure
 __all__ = ['MemsWindow']
 
 
-FCTRL_PATH = os.getcwd()
+FCTRL_PATH = os.getcwd() + "/"
 MEMS_INDEX_NAME = "mems_index.fits"
 MEMS_OPD_NAME = "mems_opd.fits"
 MEMS_CENTERS_NAME = "mems_centers.txt"
