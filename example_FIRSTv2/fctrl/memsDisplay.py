@@ -54,7 +54,7 @@ from matplotlib.figure import Figure
 __all__ = ['MemsWindow']
 
 
-FCTRLV2_PATH = os.getcwd()
+FCTRLV2_PATH = os.getcwd() + "/"
 MEMS_INDEX_NAME = "mems_index.fits"
 MEMS_OPD_NAME = "mems_opd.fits"
 MEMS_CENTERS_NAME = "mems_centers.txt"

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="43fccdda-31c9-4ddd-9d40-c63d40bfb852" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1cLjFNW5q44id8BsmJ6pV7lCZFG" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="43fccdda-31c9-4ddd-9d40-c63d40bfb852" name="Default Changelist" comment="" />
+      <created>1590314662558</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1590314662558</updated>
+    </task>
+    <task id="LOCAL-00001" summary="update">
+      <created>1590314968689</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1590314968689</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="update" />
+    <option name="LAST_COMMIT_MESSAGE" value="update" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="481" y="100" width="999" height="904" key="CommitChangelistDialog2" timestamp="1590314968528">
+      <screen x="51" y="27" width="1869" height="1053" />
+    </state>
+    <state x="481" y="100" width="999" height="904" key="CommitChangelistDialog2/51.27.1869.1053@51.27.1869.1053" timestamp="1590314968528" />
+    <state x="768" y="310" width="424" height="484" key="FileChooserDialogImpl" timestamp="1590339466815">
+      <screen x="51" y="27" width="1869" height="1053" />
+    </state>
+    <state x="768" y="310" width="424" height="484" key="FileChooserDialogImpl/51.27.1869.1053@51.27.1869.1053" timestamp="1590339466815" />
+    <state x="580" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1590314980062">
+      <screen x="51" y="27" width="1869" height="1053" />
+    </state>
+    <state x="580" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/51.27.1869.1053@51.27.1869.1053" timestamp="1590314980062" />
+    <state x="756" y="467" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1590314973156">
+      <screen x="51" y="27" width="1869" height="1053" />
+    </state>
+    <state x="756" y="467" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/51.27.1869.1053@51.27.1869.1053" timestamp="1590314973156" />
+    <state x="583" y="341" width="795" height="423" key="git4idea.merge.GitPullDialog" timestamp="1590337094474">
+      <screen x="51" y="27" width="1869" height="1053" />
+    </state>
+    <state x="583" y="341" width="795" height="423" key="git4idea.merge.GitPullDialog/51.27.1869.1053@51.27.1869.1053" timestamp="1590337094474" />
+  </component>
+</project>
