@@ -43,7 +43,7 @@ IrisAO_API = core.IrisAO_API
 ################################################################################
 
 
-FCTRLV2_PATH = "/home/slacour/Documents/lib/firstctrlv2/fctrlv2/"
+FCTRLV2_PATH = os.getcwd() + "/"
 MEMS_INDEX_NAME = "mems_index.fits"
 MEMS_OPD_NAME = "mems_opd.fits"
 MEMS_CENTERS_NAME = "mems_centers.txt"
