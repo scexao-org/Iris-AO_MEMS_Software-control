@@ -71,7 +71,7 @@ class Mems(Thread):
 
         self.pub = publisher
         self.running = True
-        self.milk_solution = True
+        self.milk_solution = False
 
         if self.milk_solution:
             # Prepare the maps to be ploted

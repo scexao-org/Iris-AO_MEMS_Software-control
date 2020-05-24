@@ -36,13 +36,5 @@ from .memsDisplay import *
 from .memsView import *
 
 
-"""
-try:
-    import andorctrl as andorctrl
-    #from .andorctrl import *
-except ImportError:
-	print ('tptp')
-"""
-
 from ._version import __version__, __major__, __minor__, __micro__
 
