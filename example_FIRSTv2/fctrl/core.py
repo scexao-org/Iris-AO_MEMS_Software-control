@@ -56,10 +56,6 @@ try:
 except:
     print("skipping IrisAO")
 
-current_dir = os.getcwd()
-os.chdir("/home/slacour/Documents/lib/firstctrlv2/")
-import IrisAO_PythonAPI as IrisAO_API
-os.chdir(current_dir)
 
 from param import *
 

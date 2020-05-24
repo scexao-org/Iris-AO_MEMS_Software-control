@@ -54,7 +54,7 @@ from matplotlib.figure import Figure
 __all__ = ['MemsWindow']
 
 
-FCTRLV2_PATH = "/home/slacour/Documents/lib/firstctrlv2/fctrlv2/"
+FCTRL_PATH = os.getcwd()
 MEMS_INDEX_NAME = "mems_index.fits"
 MEMS_OPD_NAME = "mems_opd.fits"
 MEMS_CENTERS_NAME = "mems_centers.txt"
@@ -97,11 +97,11 @@ class MemsDynamicMplCanvas(MyMplCanvas):
         self.pub = publisher
 
         # Initialise the different maps for the display of the mems surface
-        self.map_index, self.map_index_h = fits.getdata(FCTRLV2_PATH + MEMS_INDEX_NAME, header=True)
+        self.map_index, self.map_index_h = fits.getdata(FCTRL_PATH + MEMS_INDEX_NAME, header=True)
         self.map_height, self.map_width = np.shape(self.map_index)
         self.map_opd = np.ones((self.map_height, self.map_width))
         self.map_opd[self.map_index == 0] = 0
-        self.map_centers = np.loadtxt(FCTRLV2_PATH + MEMS_CENTERS_NAME, dtype=np.int)
+        self.map_centers = np.loadtxt(FCTRL_PATH + MEMS_CENTERS_NAME, dtype=np.int)
         self.map_radius_x = np.ones((self.map_height, self.map_width))
         self.map_radius_y = np.ones((self.map_height, self.map_width))
         self.compute_radii()

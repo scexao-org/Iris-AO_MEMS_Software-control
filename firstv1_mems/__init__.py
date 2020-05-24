@@ -26,6 +26,9 @@
 
 print ('tptp')
 
+
+from .com_zmq import *
+
 # import mems as mems
 from .memsCtrl import *
 
