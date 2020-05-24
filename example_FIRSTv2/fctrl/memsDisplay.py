@@ -74,8 +74,6 @@ class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
-        # self.axes1 = self.fig.add_subplot(211)
-        # self.axes2 = self.fig.add_subplot(212)
         self.fig.set_tight_layout(True)
 
         self.compute_initial_figure()
@@ -98,6 +96,7 @@ class MemsDynamicMplCanvas(MyMplCanvas):
     def __init__(self, publisher, *args, **kwargs):
         self.pub = publisher
 
+        # Initialise the different maps for the display of the mems surface
         self.map_index, self.map_index_h = fits.getdata(FCTRLV2_PATH + MEMS_INDEX_NAME, header=True)
         self.map_height, self.map_width = np.shape(self.map_index)
         self.map_opd = np.ones((self.map_height, self.map_width))
@@ -107,6 +106,7 @@ class MemsDynamicMplCanvas(MyMplCanvas):
         self.map_radius_y = np.ones((self.map_height, self.map_width))
         self.compute_radii()
 
+        # Initialise the figure (canvas)
         MyMplCanvas.__init__(self, *args, **kwargs)
         timer = QtCore.QTimer(self)
         timer.timeout.connect(self.update_figure)
@@ -116,27 +116,15 @@ class MemsDynamicMplCanvas(MyMplCanvas):
         self.mems.connect()
         self.mems.flat()
 
-        self.flag_test = True
-        self.mems.off()
-
-        # self.mems.set_pos(np.arange(1, 38), piston=np.ones(37)*0, tip=2*np.ones(37), tilt=2*np.ones(37))
-
     def compute_initial_figure(self):
         self.axes.imshow(self.map_opd, interpolation='nearest', aspect='auto', origin='lower', cmap='jet')
-        # self.axes1.scatter(ACTIVE_MEMS_SEGS, np.zeros(len(ACTIVE_MEMS_SEGS)))
-        # self.axes2.scatter(np.zeros(37), np.zeros(37))
 
     def update_figure(self):
         if self.mems.connected:
             # Get pos of mems
             piston, tip, tilt = self.mems.get_pos('all')
-            if self.flag_test:
-                self.flag_test = False
-                np.savetxt(FCTRLV2_PATH + "pisttiptilt_test.txt", np.concatenate((np.array(piston), np.array(tip), np.array(tilt))).reshape((3, 37)))
 
             # Push new data to the graph
-            # self.plot_piston(piston[ACTIVE_MEMS_SEGS - 1])
-            # self.plot_tiptilt(tip[ACTIVE_MEMS_SEGS - 1], tilt[ACTIVE_MEMS_SEGS - 1])
             self.imshow_pist_tiptilt(piston, tip, tilt)
         else:
             self.compute_initial_figure()
@@ -150,25 +138,6 @@ class MemsDynamicMplCanvas(MyMplCanvas):
 
         self.axes.clear()
         self.axes.imshow(self.map_opd, interpolation='nearest', aspect='auto', origin='lower', cmap='jet')
-        # self.fig.colorbar(im, cax=self.axes)
-        self.draw()
-
-    def plot_piston(self, piston_arr):
-        self.axes1.clear()
-        self.axes1.scatter(ACTIVE_MEMS_SEGS, piston_arr)
-        self.axes1.set_xlim(-3, np.max(ACTIVE_MEMS_SEGS) + 3)
-        self.axes1.set_ylim(core.PISTONMIN, core.PISTONMAX)
-        self.axes1.set_xlabel('Segment #')
-        self.axes1.set_ylabel('Piston')
-        self.draw()
-
-    def plot_tiptilt(self, tip_arr, tilt_ar):
-        self.axes2.clear()
-        self.axes2.scatter(tip_arr.reshape((tip_arr.size, 1)), tilt_ar.reshape((tilt_ar.size, 1)))
-        self.axes2.set_xlim(core.TIPTILTMIN, core.TIPTILTMAX)
-        self.axes2.set_ylim(core.TIPTILTMIN, core.TIPTILTMAX)
-        self.axes2.set_xlabel('Tip')
-        self.axes2.set_ylabel('Tilt')
         self.draw()
 
     def compute_radii(self):
@@ -189,19 +158,6 @@ class MemsWindow(QtWidgets.QMainWindow):
         self.pub = publisher
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        # self.setWindowTitle("application main window")
-
-        # Definition of the menu bar
-        # self.file_menu = QtWidgets.QMenu('&File', self)
-        # self.file_menu.addAction('&Quit', self.fileQuit,
-        #                          QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
-        # self.menuBar().addMenu(self.file_menu)
-        #
-        # self.help_menu = QtWidgets.QMenu('&Help', self)
-        # self.menuBar().addSeparator()
-        # self.menuBar().addMenu(self.help_menu)
-        #
-        # self.help_menu.addAction('&About', self.about)
 
         self.main_widget = QtWidgets.QWidget(self)
 
@@ -224,6 +180,11 @@ class MemsWindow(QtWidgets.QMainWindow):
 
 
 """
+###############################################################################
+# Gui for python 2
+###############################################################################
+
+
 import joystick as jk
 import core
 np = core.np
