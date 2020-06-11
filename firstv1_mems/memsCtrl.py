@@ -54,10 +54,10 @@ MEMS_CENTERS_NAME = "mems_centers.txt"
 ################################################################################
 
 
-__all__ = ['Mems']
+__all__ = ['MemsCtrl']
 
 
-class Mems(Thread):
+class MemsCtrl(Thread):
     def __init__(self, publisher):
         super().__init__()
 

@@ -38,7 +38,7 @@ os = core.os
 import time
 from astropy.io import fits
 
-from memsCtrl import Mems
+from memsCtrl import MemsCtrl
 from com_zmq import PColors
 
 from matplotlib.backends.qt_compat import QtCore, QtWidgets, is_pyqt5
@@ -113,7 +113,7 @@ class MemsDynamicMplCanvas(MyMplCanvas):
         timer.timeout.connect(self.update_figure)
         timer.start(100)
 
-        self.mems = Mems(self.pub)
+        self.mems = MemsCtrl(self.pub)
         self.mems.connect()
         self.mems.flat()
 

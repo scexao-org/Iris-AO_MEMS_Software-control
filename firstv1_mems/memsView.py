@@ -45,7 +45,7 @@ from errorManaging import MyException
 port_SUB = "tcp://localhost:5550"
 server_address = b"M"
 
-port_PUB = "tcp://*:5558"#################a remettre sur 5552, apres restart de l'ordi
+port_PUB = "tcp://*:5553"
 client_address = b"P"
 
 
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     ###	Initialise Mems Live Viewer ###
     milk_solution = False
     if milk_solution:
-        m = mCl.Mems(mems_pub)
+        m = mCl.MemsCtrl(mems_pub)
     else:
         import memsDisplay as mDy
         Mems_Qt_app = mDy.QtWidgets.QApplication(sys.argv)
