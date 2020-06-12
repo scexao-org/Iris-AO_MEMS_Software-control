@@ -3,7 +3,7 @@ Date June 17, 2016
 
 
 # 2020/05/02 Update Clement Chalumeau
-Updated for Python3.7 (beleived to wok with all python >= 3.6):
+Updated for Python3.7 (beleived to work with all python >= 3.6):
 	- Updated compilation option for Cython. 
 	- Strings passed to the SO file must be encoded (use .encode() string method)
 To make it work, just follow what's next.

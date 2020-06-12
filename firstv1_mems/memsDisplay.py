@@ -55,7 +55,7 @@ from matplotlib.figure import Figure
 __all__ = ['MemsWindow']
 
 
-FCTRL_PATH = os.getcwd() + "/firstv1_mems/"
+FCTRL_PATH = "/home/first/Documents/lib/firstctrl/FIRST_mems/firstv1_mems/"
 MEMS_INDEX_NAME = "mems_index.fits"
 MEMS_OPD_NAME = "mems_opd.fits"
 MEMS_CENTERS_NAME = "mems_centers.txt"
