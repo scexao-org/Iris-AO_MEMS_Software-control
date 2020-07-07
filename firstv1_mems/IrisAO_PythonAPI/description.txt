@@ -8,6 +8,7 @@ Updated for Python3.7 (beleived to work with all python >= 3.6):
 	- Strings passed to the SO file must be encoded (use .encode() string method)
 To make it work, just follow what's next.
 
+
 Version: Linux 64 bits
 Tested with Anaconda 64 bits for linux (Python 2.7)
 
@@ -35,10 +36,10 @@ The following files appear only after the execution of setup.py:
 
 
 To compile the module:
-Tested with Anaconda 64 bits for linux (Python 2.7)
+Tested with Anaconda 64 bits for linux (Python >= 3.6)
 - Make sure that g++ (c++ compiler) is installed, and install it if needed
 - Copy libirisao.devices.1.0.2.5.so in ${ANACONDA_SETUP_DIR}/lib
-- Create a symbolic link libirisao.devices.so from libirisao.devices.1.0.X.X.so in ${ANACONDA_SETUP_DIR}/lib 
+- Create a symbolic link libirisao.devices.so from libirisao.devices.1.0.X.X.so in ${ANACONDA_SETUP_DIR}/lib (/!\ Make sure to be in the IrisAO_PythonAPI/Library/ folder)
  (e.g. ln -s libirisao.devices.1.0.2.5.so ${ANACONDA_SETUP_DIR}/lib/libirisao.devices.so)
   where ANACONDA_SETUP_DIR is the location of anaconda, e.g /home/username/anaconda2/
 - From the current folder (IrisAO_PythonAPI), run:
