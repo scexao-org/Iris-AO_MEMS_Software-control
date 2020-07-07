@@ -27,7 +27,7 @@
 import time
 from threading import Thread
 from astropy.io import fits
-from pyMilk.interfacing.isio_shmlib import SHM
+#from pyMilk.interfacing.isio_shmlib import SHM
 
 from com_zmq import PColors
 
@@ -133,8 +133,6 @@ class MemsCtrl(Thread):
         # hack to CD to the folder with the cal files
         os.chdir(core.PATHCALMEMS)
         disableHardware = False
-        print(core.MIRRORNUM)
-        print(core.DRIVERNUM)
         self._mirror = IrisAO_API.MirrorConnect(core.MIRRORNUM,
                                                 core.DRIVERNUM,
                                                 disableHardware)
