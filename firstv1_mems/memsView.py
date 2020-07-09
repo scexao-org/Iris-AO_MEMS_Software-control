@@ -138,8 +138,8 @@ class ComPortPUB(object):
 ################################################################################
 
 
-def done(mems_connected=True):
-    if mems_connected:
+def done(comp_co=True):
+    if comp_co:
         m.disconnect()
     mems_sub.stop()
     time.sleep(1)
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     ###	Initialise Mems Live Viewer ###
     milk_solution = False
     if milk_solution:
-        m = mCl.MemsCtrl(mems_pub)
+        m = mCl.MemsCtrl(mems_pub, milk_solution)
     else:
         import memsDisplay as mDy
         Mems_Qt_app = mDy.QtWidgets.QApplication(sys.argv)
