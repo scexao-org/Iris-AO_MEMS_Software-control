@@ -1,0 +1,18 @@
+
+from ctypes import *
+import time
+from PIL import Image
+
+
+
+
+
+cdll.LoadLibrary("/usr/local/lib/libandor.so")
+dll = CDLL("/usr/local/lib/libandor.so")
+
+## Get available cameras
+c_total_cameras = c_long()
+error = dll.GetAvailableCameras(byref(c_total_cameras))
+total_cameras = c_total_cameras.value
+
+print('Total cameras :'+str(total_cameras))
