@@ -33,8 +33,9 @@ def MirrorConnect(mirror, driver, HWdisabled):
        Handle to a mirror (type 'int')
     """
     try:
-        return IAOW._connect(mirror,driver,HWdisabled)
+        return IAOW._connect(mirror.encode(),driver.encode(),HWdisabled)
     except: 
+        print("ecveption here")
         raise
 
 def MirrorRelease(mirror):
