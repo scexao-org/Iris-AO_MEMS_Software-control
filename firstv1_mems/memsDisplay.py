@@ -113,7 +113,7 @@ class MemsDynamicMplCanvas(MyMplCanvas):
         timer.timeout.connect(self.update_figure)
         timer.start(100)
 
-        self.mems = MemsCtrl(self.pub)
+        self.mems = MemsCtrl(self.pub, False)
         self.mems.connect()
         self.mems.flat()
 
