@@ -24,19 +24,7 @@
 #
 ###############################################################################
 
-print ('tptp')
 
-from .com_zmq import *
+from .firstv1_mems import *
 
-# import mems as mems
-from .memsCtrl import *
-
-# import memsctrl as memsctrl
-from .memsDisplay import *
-
-# import memsView as memsView
-from .memsView import *
-
-
-from ._version import __version__, __major__, __minor__, __micro__
 

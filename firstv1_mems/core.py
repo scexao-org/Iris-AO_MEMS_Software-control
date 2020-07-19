@@ -52,7 +52,7 @@ from datetime import datetime
 
 #from patiencebar import Patiencebar
 from scipy.ndimage import gaussian_filter
-import IrisAO_PythonAPI  as IrisAO_API
+import IrisAO_PythonAPI as IrisAO_API
 
 
 from param import *
