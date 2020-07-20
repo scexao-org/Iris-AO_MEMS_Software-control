@@ -1,0 +1,5 @@
+### FILES OR FOLDER FOR GIT TO IGNORE ###
+
+*.pyc
+
+./__pycache__/
