@@ -35,7 +35,8 @@ from com_zmq import PColors
 
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-# import scipy.optimize
+# import scipy as scpy
+# import pdb ; pdb.set_trace()
 # from scipy import optimize
 # from scipy.optimize import curve_fit
 
@@ -54,7 +55,7 @@ plt.ion()
 ################################################################################
 
 
-CURRENT_PATH        = "Documents/lib/firstctrl/FIRST_mems/firstv1_mems/"
+CURRENT_PATH        = "/home/first/Documents/lib/firstctrl/FIRST_mems/"
 MEMS_INDEX_NAME     = "mems_index.fits"
 MEMS_OPD_NAME       = "mems_opd.fits"
 MEMS_CENTERS_NAME   = "mems_centers.txt"
@@ -89,7 +90,7 @@ class MemsCtrl(Thread):
             self._init_maps()
 
             # Prepare the shared memory
-            self.data_plot = SHM('irisaoim', ((self.map_width, self.map_height), np.float64), location=-1, shared=1)
+            self.data_plot = SHM('irisaoim', ((self.map_width, self.map_height), np.float32), location=-1, shared=1)
 
             # Start the mems
             self.start()
@@ -119,7 +120,7 @@ class MemsCtrl(Thread):
         self.flat()
 
         # Start the py-milk live feed
-        os.system("shmImshow.py irisaoim &")
+        os.system("/home/first/miniconda3/bin/python /home/first/pyMilk/pyMilk/visual/shmImshow.py irisaoim &")
 
         # Push the initial opd map
         self._init_figure()
@@ -144,9 +145,8 @@ class MemsCtrl(Thread):
         # hack to CD to the folder with the cal files
         os.chdir(core.PATHCALMEMS)
         disableHardware = False
-        self._mirror = IrisAO_API.MirrorConnect(core.MIRRORNUM,
-                                                core.DRIVERNUM,
-                                                disableHardware)
+
+        self._mirror = IrisAO_API.MirrorConnect(core.MIRRORNUM,core.DRIVERNUM,disableHardware)
         # CD to previous folder
         os.chdir(self._INITIALDIR)
         self._connected = True
@@ -539,9 +539,11 @@ class MemsCtrl(Thread):
 
     def flat_field_command(self,seg):
         for s in range(9):
-            optim_command = self.command_loaded
+            ff_command = self.command_loaded
             if FIRST_SEGMENTS[s] != seg :
-                optim_command[:,FIRST_SEGMENTS[s]] = 2.
+                ff_command[:,FIRST_SEGMENTS[s]] = 2.
+
+        self.set_pos('all', tip=self.ff_command[0,:], tilt = self.ff_command[1,:]) 
 
 
 
@@ -632,7 +634,7 @@ class MemsCtrl(Thread):
                 params = moments(data)
                 errorfunction = lambda p: np.ravel(gaussian(*p)(*np.indices(data.shape)) -
                                                    data)
-                p, success = scipy.optimize.leastsq(errorfunction, params)
+                p, success = scpy.optimize.leastsq(errorfunction, params)
                 return p
                 
 
@@ -664,20 +666,19 @@ class MemsCtrl(Thread):
         #         Init scan         #
         #############################
 
-        npt                 = np.int(window_scan/step_scan)
+        npt                 = np.int(window_scan/step_scan)+1
         # self._pprint('Npt:'+str(npt))
         sp, switch          = spiral(npt)
         # self._pprint(sp)
 
-        sp                  = sp*(window_scan/2.)
-        self._pprint(sp)
-
+        sp                  = (sp/np.max(sp))*(window_scan/2.)
+        # self._pprint(sp)
         
-        tip0,tilt0          = 0,0
+        tip0,tilt0          = sp[0,0], sp[0,1]
         self.res_optim_raw  = np.zeros((npt, npt, n_raw, 9))
         self.res_optim      = np.zeros((npt, npt, 9))
-        indtip0             = npt/2.
-        indtilt0            = npt/2.
+        indtip0             = np.int(npt/2.)
+        indtilt0            = np.int(npt/2.)
 
         self.map_tip        = np.zeros((npt,npt))
         self.map_tilt       = np.zeros((npt,npt))
@@ -691,25 +692,31 @@ class MemsCtrl(Thread):
         tip_command         = np.zeros(37)
         tilt_command        = np.zeros(37)
         
-        cnt = 0
-        cnt1 = 0
+        cnt                 = 0
+        cnt1                = 0
 
     
         #############################
         #      First position       #
         #############################
         for s in range(9):
-            #self._pprint('Test1')
-            tip_command[FIRST_SEGMENTS[s]-1] = tip0
-            tilt_command[FIRST_SEGMENTS[s]-1] = tilt0
-        #self._pprint('Test2')
+            tip_command[FIRST_SEGMENTS[s]-1]    = tip0
+            tilt_command[FIRST_SEGMENTS[s]-1]   = tilt0
+        # self._pprint(tip_command)
+        # self._pprint(tilt_command)
+
         self.set_pos('all', tip = tip_command, tilt = tilt_command)
         time.sleep(0.05)
         #time.sleep(1.)
         #self._pprint('Test3')
         
-        self.map_tip [np.int(np.ceil(indtip0-1)),np.int(np.ceil(indtilt0-1))] = tip0
-        self.map_tilt[np.int(np.ceil(indtip0-1)),np.int(np.ceil(indtilt0-1))] = tilt0
+        self.map_tip [indtip0,indtilt0] = tip0
+        self.map_tilt[indtip0,indtilt0] = tilt0
+
+        # self._pprint('Ind Tip:'+str(indtip0))
+        # self._pprint('Ind Tilt:'+str(indtilt0))
+        # self._pprint('Tip:'+str(tip0))
+        # self._pprint('Tilt:'+str(tilt0))
 
         for r in range(n_raw):
             while (cnt1 <= cnt):
@@ -718,39 +725,38 @@ class MemsCtrl(Thread):
             #self._pprint('Test4')
             #self._pprint(self.flux.get_data(True, True, timeout = 1.))
             #self._pprint(self.res_optim_raw[np.int(np.ceil(indtip0-1)),np.int(np.ceil(indtilt0-1)),r,:])
-            self.res_optim_raw[np.int(np.ceil(indtip0-1)),np.int(np.ceil(indtilt0-1)),r,:]   = self.flux.get_data(True, True, timeout = 1.)
-            # time.sleep(0.1)
-            
+            self.res_optim_raw[indtip0, indtilt0, r, :] = self.flux.get_data(True, True, timeout = 1.)            
            
-        self.res_optim[np.int(np.ceil(indtip0-1)),np.int(np.ceil(indtilt0-1)),:] = np.mean(self.res_optim_raw[np.int(np.ceil(indtip0-1)),np.int(np.ceil(indtilt0-1)),:,:],axis=0)
+        self.res_optim[indtip0, indtilt0, :] = np.mean(self.res_optim_raw[indtip0, indtilt0, :, :],axis=0)
         #print(self.res_optim[int(indphi0)-1,int(indtheta0)-1])
         #print('Index: x:',np.ceil(indphi0-1),'y:',np.ceil(indtheta0-1))
+        indtip  = indtip0
+        indtilt = indtilt0
         #############################
         #  Start spiral movement    #
         #############################
         for i in tqdm(range(1,npt**2)):
         # for i in range(1,npt**2):
 
-            xi = tip0+sp[i,0]
-            yi = tilt0+sp[i,1]
+            xi = np.around(tip0 +sp[i,0],decimals=3)
+            yi = np.around(tilt0+sp[i,1],decimals=3)
 
             for s in range(9):
                 tip_command[FIRST_SEGMENTS[s]-1]    = xi
                 tilt_command[FIRST_SEGMENTS[s]-1]   = yi
 
-            # self._pprint('Position: x:')
-            # self._pprint(xi)
-            # self._pprint('Position y:')
-            # self._pprint(yi)
+            indtip                                    = np.int(indtip0 +np.around(sp[i,0],decimals=3)/(window_scan/2.)*(np.int(npt/2.)))
+            indtilt                                   = np.int(indtilt0+np.around(sp[i,1],decimals=3)/(window_scan/2.)*(np.int(npt/2.)))
 
-            indtip                                    = indtip0+sp[i,0]*(npt)/4.
-            indtilt                                   = indtilt0+sp[i,1]*(npt)/4.
-
-            # self._pprint('Ind Tip:'+str(indtip))
-            # self._pprint('Ind Tilt:'+str(indtilt))
-
-            self.map_tip [np.int(np.ceil(indtip-1)),np.int(np.ceil(indtilt-1))] = xi
-            self.map_tilt[np.int(np.ceil(indtip-1)),np.int(np.ceil(indtilt-1))] = yi
+            # print('Ind Tip:'+str(indtip))
+            # print('Ind Tilt:'+str(indtilt))
+            # print('Tip:'+str(xi))
+            # print('SP:'+str(sp[i,0]))
+            # print('Tilt:'+str(yi))
+            # self.map_tip [np.int(np.ceil(indtip-1)),np.int(np.ceil(indtilt-1))] = xi
+            # self.map_tilt[np.int(np.ceil(indtip-1)),np.int(np.ceil(indtilt-1))] = yi
+            # self.map_tip [np.int(indtip-1),np.int(indtilt-1)] = xi
+            # self.map_tilt[np.int(indtip-1),np.int(indtilt-1)] = yi
             #self._pprint('Index: x:',np.ceil(indphi-1),'y:',np.ceil(indtheta-1))
             if i==1:
                 axis = "x"
@@ -759,18 +765,22 @@ class MemsCtrl(Thread):
             if i > 1:
                 if switch[i-1]:
                     if axis == "y":
-                        #con.open(self.conex_id_phi)
                         axis = "x"
                     else:
-                        #con.open(self.conex_id_theta)
                         axis = "y"
+                    # time.sleep(0.1)
                 if axis == "x":
                     self.set_pos('all', tip = tip_command)
                 else:
                     self.set_pos('all', tilt = tilt_command)
 
             
-            time.sleep(0.05)
+
+            self.map_tip [indtip,indtilt] = xi
+            self.map_tilt[indtip,indtilt] = yi
+
+            
+            time.sleep(0.2)
             #############################
             #     Take Flux values      #
             #############################   
@@ -778,13 +788,16 @@ class MemsCtrl(Thread):
                 while (cnt1 <= cnt):
                     cnt1 = self.flux.get_counter()
                 cnt = cnt1
-                # self.res_optim_raw[np.int(np.ceil(indtip-1)),np.int(np.ceil(indtilt-1)),r,:]  = i
-                self.res_optim_raw[np.int(np.ceil(indtip-1)),np.int(np.ceil(indtilt-1)),r,:]  = self.flux.get_data(True, True, timeout = 1.)
-                #time.sleep(0.1)
+                # self.res_optim_raw[np.int(np.ceil(indtip-1)),np.int(np.ceil(indtilt-1)),r,:]  = self.flux.get_data(True, True, timeout = 1.)
+                # self.res_optim_raw[np.int(indtip-1),np.int(indtilt-1),r,:]  = self.flux.get_data(True, True, timeout = 1.)
+                self.res_optim_raw[indtip, indtilt, r, :] = self.flux.get_data(True, True, timeout = 1.)  
             
-           
-            self.res_optim[np.int(np.ceil(indtip-1)),np.int(np.ceil(indtilt-1)),:]            = np.mean(self.res_optim_raw[np.int(np.ceil(indtip-1)),np.int(np.ceil(indtilt-1)),:,:],axis=0)
-            # self.res_optim[np.int(np.ceil(indtip-1)),np.int(np.ceil(indtilt-1)),:]            = i
+            # time.sleep(0.1)
+        
+            # self.res_optim[np.int(np.ceil(indtip-1)),np.int(np.ceil(indtilt-1)),:]            = np.mean(self.res_optim_raw[np.int(np.ceil(indtip-1)),np.int(np.ceil(indtilt-1)),:,:],axis=0)
+            # self.res_optim[np.int(indtip-1),np.int(indtilt-1),:]            = np.mean(self.res_optim_raw[np.int(indtip-1),np.int(indtilt-1),:,:],axis=0)
+            self.res_optim[indtip, indtilt, :] = np.mean(self.res_optim_raw[indtip, indtilt, :, :],axis=0)
+            # self.res_optim[indtip,indtilt,:]            = i*10.
 
             #print(self.res_optim[int(indphi)-1,int(indtheta)-1])
             
@@ -799,8 +812,11 @@ class MemsCtrl(Thread):
         # #############################
         # for s in range(9):
         #     indtip_opt[s], indtilt_opt[s]  = process_optim_map(self.res_optim[:,:,s], Target, window_scan, np.around(step_scan,decimals=2), FIRST_SEGMENTS[s])
-        # tip_opt   = tip0  -(indtip0 -indtip_opt )*step_scan
-        # tilt_opt  = tilt0 -(indtilt0-indtilt_opt)*step_scan
+            
+        #     tip_temp = np.int(indtip_opt[s])
+        #     tilt_temp = np.int(indtilt_opt[s])
+        #     tip_opt[s]     = self.map_tip[tip_temp, tilt_temp]
+        #     tilt_opt[s]    = self.map_tilt[tip_temp, tilt_temp]
         # self._pprint('Optimal process position in tip:')
         # self._pprint(tip_opt)
         # self._pprint('Optimal process position in tilt:')
@@ -859,7 +875,7 @@ class MemsCtrl(Thread):
         # step_scan = 1
         self._pprint('Scan in tip from '+str(np.around(np.min(self.map_tip),decimals=4))+' to '+str(np.around(np.max(self.map_tip),decimals=4)))
         self._pprint('Scan in tilt from '+str(np.around(np.min(self.map_tilt),decimals=4))+' to '+str(np.around(np.max(self.map_tilt),decimals=4)))
-        # print('Step:',np.around((self.map_phi[1,0]-self.map_phi[0,0])*1e3,decimals=1),'um', '--', np.around(step_scan,decimals=0),'mas' )
+        self._pprint('Step of the scan :'+str(step_scan))
         
         # print('Optimal position in phi:',np.around(phi_opt, decimals = 6), 'in theta:',np.around(theta_opt, decimals=6))
         

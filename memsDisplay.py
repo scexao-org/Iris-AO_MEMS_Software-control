@@ -110,10 +110,14 @@ class MemsDynamicMplCanvas(MyMplCanvas):
         # Initialise the figure (canvas)
         MyMplCanvas.__init__(self, *args, **kwargs)
         timer = QtCore.QTimer(self)
+
+
         timer.timeout.connect(self.update_figure)
         timer.start(100)
 
+
         self.mems = MemsCtrl(self.pub, False)
+
         #self.mems.connect()
         #self.mems.flat()
 
@@ -122,6 +126,7 @@ class MemsDynamicMplCanvas(MyMplCanvas):
 
     def update_figure(self):
         if self.mems.connected:
+
             # Get pos of mems
             piston, tip, tilt = self.mems.get_pos('all')
 

@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
 
     ###	Initialise Mems Live Viewer ###
-    milk_solution = False
+    milk_solution = True
     if milk_solution:
         m = mCl.MemsCtrl(mems_pub, milk_solution)
     else:
