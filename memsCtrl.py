@@ -80,17 +80,20 @@ class MemsCtrl(Thread):
         # Define the attributes
         self._INITIALDIR = os.getcwd()
         self._connected = False
-        self._pos = 0*np.ones((core.NSEGMENTS, 3))
-        self._off = np.c_[np.ones((core.NSEGMENTS, 2))*core.TIPTILTMIN,
-                          0*np.ones((core.NSEGMENTS, 1))]
-        self._on = 0*np.ones((core.NSEGMENTS, 3))
+        self._pos = np.zeros((core.NSEGMENTS, 3))
+        self._on = np.zeros((core.NSEGMENTS, 3))
+        self._off = np.c_[np.zeros((core.NSEGMENTS, 1)),
+                          np.ones((core.NSEGMENTS, 2)) * core.TIPTILTMIN]
+        self._opti = np.zeros((core.NSEGMENTS, 3))
 
+        # Initialise the GUI
         if self.milk_solution:
             # Prepare the maps to be ploted
             self._init_maps()
 
             # Prepare the shared memory
-            self.data_plot = SHM('irisaoim', ((self.map_width, self.map_height), np.float32), location=-1, shared=1)
+            self.shm_live_name = "irisaoIm"
+            self.data_plot = SHM(self.shm_live_name, ((self.map_width, self.map_height), np.float32), location=-1, shared=1)
 
             # Start the mems
             self.start()
@@ -109,10 +112,55 @@ class MemsCtrl(Thread):
     __exit__ = __del__
 
     def _pprint(self, message):
-        '''
-        Print message with a color define in the class PColors.
-        '''
+        """Print message with a color define in the class PColors."""
         self.pub.pprint(PColors.MEMS + str(message) + PColors.ENDC)
+
+    # Gui methods
+    def _compute_radii(self):
+        for pix_x in range(self.map_height):
+            for pix_y in range(self.map_width):
+                seg_ind = self.map_index[pix_x, pix_y]
+                if seg_ind != 0:
+                    radius_x = pix_x - self.map_centers[0, seg_ind - 1]
+                    self.map_radius_x[pix_x, pix_y] = radius_x
+                    radius_y = pix_y - self.map_centers[1, seg_ind - 1]
+                    self.map_radius_y[pix_x, pix_y] = radius_y
+
+    def _init_maps(self):
+        self.map_index, self.map_index_h = fits.getdata(CURRENT_PATH + MEMS_INDEX_NAME, header=True)
+        self.map_height, self.map_width = np.shape(self.map_index)
+        self.map_opd = np.ones((self.map_height, self.map_width))
+        self.map_opd[self.map_index == 0] = 0
+        self.map_centers = np.loadtxt(CURRENT_PATH + MEMS_CENTERS_NAME, dtype=np.int)
+        self.map_radius_x = np.ones((self.map_height, self.map_width))
+        self.map_radius_y = np.ones((self.map_height, self.map_width))
+        self._compute_radii()
+
+    def _init_figure(self):
+        #
+        self.data_plot.set_data(self.map_opd.astype(np.float32))
+
+    def _update_map(self, piston_arr, tip_arr, tilt_ar):
+        """Compute piston, tip and tilt in opd unit."""
+        for seg_ind in range(37):
+            tip_value = self.map_radius_x[self.map_index == seg_ind + 1] * np.sin(tip_arr[seg_ind] * 10 ** (-3))
+            tilt_value = self.map_radius_y[self.map_index == seg_ind + 1] * np.sin(tilt_ar[seg_ind] * 10 ** (-3))
+            self.map_opd[self.map_index == seg_ind + 1] = piston_arr[seg_ind] + tip_value + tilt_value
+
+    def run(self):
+        if self.milk_solution:
+            while self.running:
+                if self.connected:
+                    # Get pos of mems
+                    piston, tip, tilt = self.get_pos('all')
+
+                    # Compute the new opd map
+                    self._update_map(piston, tip, tilt)
+
+                    # Push data to the sahred memory
+                    self.data_plot.set_data(self.map_opd.astype(np.float32))
+                else:
+                    self._init_figure()
 
     def start(self):
         # Start the mems
@@ -136,25 +184,21 @@ class MemsCtrl(Thread):
         self.join()
 
     def connect(self):
-        """
-        Connects to the Mems
-        """
+        """Connects to the Mems."""
         # already connected
         if self._connected:
             return 0
         # hack to CD to the folder with the cal files
         os.chdir(core.PATHCALMEMS)
         disableHardware = False
+        self._mirror = IrisAO_API.MirrorConnect(core.MIRRORNUM, core.DRIVERNUM, disableHardware)
 
-        self._mirror = IrisAO_API.MirrorConnect(core.MIRRORNUM,core.DRIVERNUM,disableHardware)
         # CD to previous folder
         os.chdir(self._INITIALDIR)
         self._connected = True
 
     def disconnect(self):
-        """
-        Disconnects the Mems
-        """
+        """Disconnects the Mems."""
         if not self._connected:
             self._pprint("ERROR: Not connected to Mems")
             return 0
@@ -163,16 +207,12 @@ class MemsCtrl(Thread):
         self._connected = False
 
     def exit(self):
-        """
-        Disconnects the Mems
-        """
+        """Disconnects the Mems."""
         self.disconnect()
 
     @property
     def connected(self):
-        """
-        If there is an active link to the Mems
-        """
+        """If there is an active link to the Mems."""
         return self._connected
 
     @connected.setter
@@ -189,9 +229,7 @@ class MemsCtrl(Thread):
 
     @property
     def first_seg(self):
-        """
-        The favorite segments of First
-        """
+        """The favorite segments of First."""
         return core.FIRSTSEGS
 
     @first_seg.setter
@@ -199,9 +237,7 @@ class MemsCtrl(Thread):
         self._pprint('Read-only')
         
     def flat(self):
-        """
-        Sets all tip, tilt, piston to nil
-        """
+        """Sets all tip, tilt, piston to nil."""
         if not self._connected:
             self._pprint("ERROR: Not connected to Mems")
             return 0
@@ -217,17 +253,13 @@ class MemsCtrl(Thread):
         piston, tip, tilt = arr[:, :][core.mask_elm(elm)].T
         self.set_pos(elm=elm, piston=piston, tip=tip, tilt=tilt)
 
-    def off(self, elm='all'):
-        """
-        Sets all piston to nil; sets tip & tilt to min range
-        """
-        self._moveit(self._off, elm)
-
-    def on(self, elm='first'):
-        """
-        Sets all piston to nil; sets tip & tilt to min range
-        """
+    def on(self, elm='all'):
+        """Sets all piston to nil; sets tip & tilt to min range."""
         self._moveit(self._on, elm)
+
+    def off(self, elm='all'):
+        """Sets all piston to nil; sets tip & tilt to min range."""
+        self._moveit(self._off, elm)
 
     def _clean_segment(self, elm):
         if isinstance(elm, int):
@@ -365,21 +397,15 @@ class MemsCtrl(Thread):
         self._off = self._pos.copy()
 
     def shape_list(self):
-        """
-        Shows all available shape files saved
-        """
+        """Shows all available shape files saved."""
         self._pprint("\n".join(core.list_filepath(core.SHAPEFILENAME)))
 
     def shape_on_list(self):
-        """
-        Shows all available shape ON files saved
-        """
+        """Shows all available shape ON files saved."""
         self._pprint("\n".join(core.list_filepath(core.SHAPEONFILENAME)))
 
     def shape_off_list(self):
-        """
-        Shows all available shape OFF files saved
-        """
+        """Shows all available shape OFF files saved."""
         self._pprint("\n".join(core.list_filepath(core.SHAPEOFFFILENAME)))
 
     def _shape_delete(self, name):
@@ -442,9 +468,9 @@ class MemsCtrl(Thread):
         # res = self._shape_load(name)
         # if res is not None:
         #     self._moveit(np.loadtxt(name), 'all')
-        name = '/home/first/Documents/lib/firstctrl/data/optim_commands/'+name_file
-        self.command_loaded = np.load(name+'.npy')
-        self.set_pos('all', tip=self.command_loaded[0,:], tilt = self.command_loaded[1,:])
+        name = '/home/first/Documents/lib/firstctrl/data/optim_commands/' + name_file
+        self.command_loaded = np.load(name + '.npy')
+        self.set_pos('all', tip=self.command_loaded[0, :], tilt=self.command_loaded[1, :])
 
     def shape_on_load(self, name):
         """
@@ -485,53 +511,6 @@ class MemsCtrl(Thread):
             # print(piston_begin+i*step)
             # print('Piston step nb '+str(i+1))
             time.sleep(wait_time)
-
-    # Gui methods
-    def run(self):
-        if self.milk_solution:
-            while self.running:
-                if self.connected:
-                    # Get pos of mems
-                    piston, tip, tilt = self.get_pos('all')
-
-                    # Compute the new opd map
-                    self._update_map(piston, tip, tilt)
-
-                    # Push data to the sahred memory
-                    self.data_plot.set_data(self.map_opd.astype(np.float32))
-                else:
-                    self._init_figure()
-
-    def _compute_radii(self):
-        for pix_x in range(self.map_height):
-            for pix_y in range(self.map_width):
-                seg_ind = self.map_index[pix_x, pix_y]
-                if seg_ind != 0:
-                    radius_x = pix_x - self.map_centers[0, seg_ind - 1]
-                    self.map_radius_x[pix_x, pix_y] = radius_x
-                    radius_y = pix_y - self.map_centers[1, seg_ind - 1]
-                    self.map_radius_y[pix_x, pix_y] = radius_y
-
-    def _init_maps(self):
-        self.map_index, self.map_index_h = fits.getdata(CURRENT_PATH + MEMS_INDEX_NAME, header=True)
-        self.map_height, self.map_width = np.shape(self.map_index)
-        self.map_opd = np.ones((self.map_height, self.map_width))
-        self.map_opd[self.map_index == 0] = 0
-        self.map_centers = np.loadtxt(CURRENT_PATH + MEMS_CENTERS_NAME, dtype=np.int)
-        self.map_radius_x = np.ones((self.map_height, self.map_width))
-        self.map_radius_y = np.ones((self.map_height, self.map_width))
-        self._compute_radii()
-
-    def _init_figure(self):
-        #
-        self.data_plot.set_data(self.map_opd.astype(np.float32))
-
-    def _update_map(self, piston_arr, tip_arr, tilt_ar):
-        """Compute piston, tip and tilt in opd unit."""
-        for seg_ind in range(37):
-            tip_value = self.map_radius_x[self.map_index == seg_ind + 1] * np.sin(tip_arr[seg_ind] * 10 ** (-3))
-            tilt_value = self.map_radius_y[self.map_index == seg_ind + 1] * np.sin(tilt_ar[seg_ind] * 10 ** (-3))
-            self.map_opd[self.map_index == seg_ind + 1] = piston_arr[seg_ind] + tip_value + tilt_value
 
     #################################################################################
     # Optimization procedure
