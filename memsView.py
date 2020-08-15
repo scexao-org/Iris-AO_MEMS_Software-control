@@ -138,12 +138,17 @@ class ComPortPUB(object):
 ################################################################################
 
 
+def pprint(message):
+    """Print message with a color define in the class PColors."""
+    mems_pub.pprint(PColors.MEMS + "    " + str(message) + PColors.ENDC)
+
+
 def done(comp_co=True):
     if comp_co:
         m.disconnect()
     mems_sub.stop()
     time.sleep(1)
-    mems_pub.pprint(PColors.MEMS + "    Mems shut down COMPLETE\n" + PColors.ENDC)
+    pprint("Mems shut down COMPLETE\n")
     mems_pub.stop()
     os._exit(1)
 

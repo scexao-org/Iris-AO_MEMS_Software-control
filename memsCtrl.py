@@ -113,10 +113,14 @@ class MemsCtrl(Thread):
 
     def _pprint(self, message):
         """Print message with a color define in the class PColors."""
-        self.pub.pprint(PColors.MEMS + str(message) + PColors.ENDC)
+        self.pub.pprint(PColors.MEMS + "    " + str(message) + PColors.ENDC)
 
-    # Gui methods
     def _compute_radii(self):
+        """
+        Return a map of radii from the centers of the hexagons.
+        Every hexagons in this map contain a radius value in their pixels.
+        To do so it uses the center coordinates of every hexagons in the variable 'self.map_centers'.
+        """
         for pix_x in range(self.map_height):
             for pix_y in range(self.map_width):
                 seg_ind = self.map_index[pix_x, pix_y]
@@ -127,6 +131,11 @@ class MemsCtrl(Thread):
                     self.map_radius_y[pix_x, pix_y] = radius_y
 
     def _init_maps(self):
+        """
+        Initialisation for the future drawing of the mems map.
+        It loads a raw mems-like map, a hexagon-index map (every hexagons contain its number in their pixels)
+        and the center coordinates of the hexagons in the previous maps.
+        """
         self.map_index, self.map_index_h = fits.getdata(CURRENT_PATH + MEMS_INDEX_NAME, header=True)
         self.map_height, self.map_width = np.shape(self.map_index)
         self.map_opd = np.ones((self.map_height, self.map_width))
@@ -137,11 +146,11 @@ class MemsCtrl(Thread):
         self._compute_radii()
 
     def _init_figure(self):
-        #
+        """Put the current map into the shm at the initialisation or in case the mems are not connected."""
         self.data_plot.set_data(self.map_opd.astype(np.float32))
 
     def _update_map(self, piston_arr, tip_arr, tilt_ar):
-        """Compute piston, tip and tilt in opd unit."""
+        """Compute piston, tip and tilt in opd unit (um, mrad, mrad)."""
         for seg_ind in range(37):
             tip_value = self.map_radius_x[self.map_index == seg_ind + 1] * np.sin(tip_arr[seg_ind] * 10 ** (-3))
             tilt_value = self.map_radius_y[self.map_index == seg_ind + 1] * np.sin(tilt_ar[seg_ind] * 10 ** (-3))
@@ -177,7 +186,8 @@ class MemsCtrl(Thread):
         super().start()
 
     def stop(self):
-        self._pprint("    Closing mems...\n")
+        # Don't work yet because of the Thread
+        self._pprint("Closing mems...\n")
         time.sleep(1)
         self.running = False
         time.sleep(1)
