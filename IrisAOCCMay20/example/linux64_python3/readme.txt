@@ -1,18 +1,16 @@
 Authors: Clement Chalumeau (SETI Institute) & Franck Marchis (Iris AO & SETI Institute)
 Date: June 17, 2016
+Last update: May 2, 2020
 
 
 Code example using the IrisAO_Python API
 
 Version linux 64 bits
-Tested on Anaconda2 64 bits (Python 2.7) and Linux Ubuntu 15.04
+Tested on Anaconda2 64 bits (Python 2.7), Anaconda3 64 bits
 You can dowload Anaconda from  https://www.continuum.io/downloads
 
 
-- Create a symbolib link named libirisao.devices.so to libirisao.devices.1.0.2.5.so 
-  (found in IrisAO_PythonAPI/Library) in ${ANACONDA_SETUP_DIR}/lib  where ANACONDA_SETUP_DIR 
-  is the location of anaconda, e.g   /home/username/anaconda2/
-  (e.g. ln -s IrisAO_PythonAPI/Library/libirisao.devices.1.0.2.5.so ${ANACONDA_SETUP_DIR}/lib/libirisao.devices.so)
+- Install the library IrisAO_PythonAPI following guidelines in 'IrisAO_PythonAPI/description.txt'.
 - Copy the mirror configuration file (.mcf) and driver configuration file
   (.dcf) corresponding to your mirror into the working directory
 - Change the corresponding parameters in the file Example_IrisAO_PythonAPI.py
